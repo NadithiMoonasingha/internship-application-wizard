@@ -46,6 +46,14 @@
     .full-width-field {
       grid-column: auto;
     }
+  
+    .skills-input-row {
+      flex-direction: column;
+    }
+  
+    .add-skill-button {
+      width: 100%;
+    }
   }
 
   .skills-input-row {

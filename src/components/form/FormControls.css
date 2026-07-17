@@ -64,3 +64,71 @@
   .form-error {
     color: #b91c1c;
   }
+
+  .file-control {
+    width: 100%;
+    padding: 10px;
+    color: #334155;
+    background: #ffffff;
+    border: 1px dashed #94a3b8;
+    border-radius: 9px;
+    cursor: pointer;
+  }
+  
+  .file-control:hover {
+    border-color: #4f46e5;
+    background: #f8fafc;
+  }
+  
+  .file-control:focus {
+    outline: 3px solid rgba(79, 70, 229, 0.14);
+    border-color: #4f46e5;
+  }
+  
+  .file-control[aria-invalid="true"] {
+    border-color: #dc2626;
+  }
+  
+  .file-control::file-selector-button {
+    margin-right: 12px;
+    padding: 8px 12px;
+    color: #4338ca;
+    background: #eef2ff;
+    border: 0;
+    border-radius: 7px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  
+  .file-control::file-selector-button:hover {
+    background: #e0e7ff;
+  }
+  
+  .file-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 14px;
+    color: #64748b;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 9px;
+  }
+  
+  .file-preview-selected {
+    color: #047857;
+    background: #ecfdf5;
+    border-color: #a7f3d0;
+  }
+  
+  .file-preview-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  
+  .file-preview strong {
+    overflow-wrap: anywhere;
+    color: inherit;
+  }

@@ -4,6 +4,7 @@ import "./App.css";
 import {
   EducationAndSkillsStep,
   PersonalDetailsStep,
+  ReviewAndSubmitStep,
 } from "./components/steps";
 
 import {
@@ -22,12 +23,6 @@ import type {
 interface WizardStep {
   number: FormStep;
   label: string;
-}
-
-interface StepPlaceholderProps {
-  step: FormStep;
-  title: string;
-  description: string;
 }
 
 const wizardSteps: ReadonlyArray<WizardStep> = [
@@ -57,29 +52,6 @@ const nextSteps: Record<FormStep, FormStep> = {
   3: 3,
 };
 
-function StepPlaceholder({
-  step,
-  title,
-  description,
-}: StepPlaceholderProps) {
-  return (
-    <section
-      className="step-placeholder"
-      aria-labelledby={`placeholder-heading-${step}`}
-    >
-      <p className="placeholder-step-number">
-        Step {step}
-      </p>
-
-      <h2 id={`placeholder-heading-${step}`}>
-        {title}
-      </h2>
-
-      <p>{description}</p>
-    </section>
-  );
-}
-
 function App() {
   const [currentStep, setCurrentStep] =
     useState<FormStep>(1);
@@ -89,8 +61,11 @@ function App() {
       initialApplicationData,
     );
 
-  const [errors] =
+  const [errors, setErrors] =
     useState<FormErrors>(initialFormErrors);
+
+  const [isSubmitted, setIsSubmitted] =
+    useState(false);
 
   function updatePersonalField<
     K extends keyof PersonalDetails,
@@ -122,6 +97,27 @@ function App() {
     }));
   }
 
+  const updateTermsAccepted = (
+    accepted: boolean,
+  ) => {
+    setFormData((currentData) => ({
+      ...currentData,
+      termsAccepted: accepted,
+    }));
+
+    if (accepted) {
+      setErrors((currentErrors) => {
+        const nextErrors = {
+          ...currentErrors,
+        };
+
+        delete nextErrors.termsAccepted;
+
+        return nextErrors;
+      });
+    }
+  };
+
   const handlePreviousStep = () => {
     setCurrentStep(
       (current) => previousSteps[current],
@@ -132,6 +128,50 @@ function App() {
     setCurrentStep(
       (current) => nextSteps[current],
     );
+  };
+
+  const handleEditStep = (
+    step: 1 | 2,
+  ) => {
+    setCurrentStep(step);
+  };
+
+  const handleSubmit = () => {
+    if (!formData.termsAccepted) {
+      setErrors((currentErrors) => ({
+        ...currentErrors,
+        termsAccepted:
+          "Please confirm that your information is accurate.",
+      }));
+
+      return;
+    }
+
+    setIsSubmitted(true);
+  };
+
+  const handleStartNew = () => {
+    setFormData({
+      personalDetails: {
+        ...initialApplicationData.personalDetails,
+      },
+
+      educationAndSkills: {
+        ...initialApplicationData
+          .educationAndSkills,
+        skills: [],
+      },
+
+      termsAccepted: false,
+    });
+
+    setErrors({
+      personalDetails: {},
+      educationAndSkills: {},
+    });
+
+    setCurrentStep(1);
+    setIsSubmitted(false);
   };
 
   const renderCurrentStep = () => {
@@ -160,10 +200,18 @@ function App() {
 
       case 3:
         return (
-          <StepPlaceholder
-            step={3}
-            title="Review and submit"
-            description="The final application review will be added after the form steps are complete."
+          <ReviewAndSubmitStep
+            data={formData}
+            termsError={
+              errors.termsAccepted
+            }
+            isSubmitted={isSubmitted}
+            onTermsChange={
+              updateTermsAccepted
+            }
+            onEditStep={handleEditStep}
+            onSubmit={handleSubmit}
+            onStartNew={handleStartNew}
           />
         );
     }
@@ -177,7 +225,9 @@ function App() {
             Internship Application
           </p>
 
-          <h1>Application Form Wizard</h1>
+          <h1>
+            Application Form Wizard
+          </h1>
 
           <p>
             Complete each section to prepare your
@@ -238,25 +288,28 @@ function App() {
           {renderCurrentStep()}
         </div>
 
-        <footer className="wizard-navigation">
-          <button
-            type="button"
-            className="secondary-button"
-            onClick={handlePreviousStep}
-            disabled={currentStep === 1}
-          >
-            Previous
-          </button>
+        {!isSubmitted && (
+          <footer className="wizard-navigation">
+            <button
+              type="button"
+              className="secondary-button"
+              onClick={handlePreviousStep}
+              disabled={currentStep === 1}
+            >
+              Previous
+            </button>
 
-          <button
-            type="button"
-            className="primary-button"
-            onClick={handleNextStep}
-            disabled={currentStep === 3}
-          >
-            Next
-          </button>
-        </footer>
+            {currentStep < 3 && (
+              <button
+                type="button"
+                className="primary-button"
+                onClick={handleNextStep}
+              >
+                Next
+              </button>
+            )}
+          </footer>
+        )}
       </section>
     </main>
   );

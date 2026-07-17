@@ -1,12 +1,7 @@
 import { useState } from "react";
 import "./App.css";
 
-import {
-  SelectInput,
-  TextInput,
-} from "./components/form";
-
-import type { SelectOption } from "./components/form";
+import { PersonalDetailsStep } from "./components/steps";
 
 import {
   initialApplicationData,
@@ -15,22 +10,36 @@ import {
 
 import type {
   ApplicationFormData,
-  ExperienceLevel,
   FormErrors,
   FormStep,
+  PersonalDetails,
 } from "./types/application";
 
-type PersonalDetailsData =
-  ApplicationFormData["personalDetails"];
+interface WizardStep {
+  number: FormStep;
+  label: string;
+}
 
-type EducationAndSkillsData =
-  ApplicationFormData["educationAndSkills"];
+interface StepPlaceholderProps {
+  step: FormStep;
+  title: string;
+  description: string;
+}
 
-const stepTitles: Record<FormStep, string> = {
-  1: "Personal details",
-  2: "Education and skills",
-  3: "Review and submit",
-};
+const wizardSteps: ReadonlyArray<WizardStep> = [
+  {
+    number: 1,
+    label: "Personal",
+  },
+  {
+    number: 2,
+    label: "Education",
+  },
+  {
+    number: 3,
+    label: "Review",
+  },
+];
 
 const previousSteps: Record<FormStep, FormStep> = {
   1: 1,
@@ -44,27 +53,28 @@ const nextSteps: Record<FormStep, FormStep> = {
   3: 3,
 };
 
-const experienceOptions: ReadonlyArray<
-  SelectOption<ExperienceLevel>
-> = [
-  {
-    value: "",
-    label: "Select your experience level",
-    disabled: true,
-  },
-  {
-    value: "Beginner",
-    label: "Beginner",
-  },
-  {
-    value: "Intermediate",
-    label: "Intermediate",
-  },
-  {
-    value: "Advanced",
-    label: "Advanced",
-  },
-];
+function StepPlaceholder({
+  step,
+  title,
+  description,
+}: StepPlaceholderProps) {
+  return (
+    <section
+      className="step-placeholder"
+      aria-labelledby={`placeholder-heading-${step}`}
+    >
+      <p className="placeholder-step-number">
+        Step {step}
+      </p>
+
+      <h2 id={`placeholder-heading-${step}`}>
+        {title}
+      </h2>
+
+      <p>{description}</p>
+    </section>
+  );
+}
 
 function App() {
   const [currentStep, setCurrentStep] =
@@ -79,30 +89,15 @@ function App() {
     useState<FormErrors>(initialFormErrors);
 
   function updatePersonalField<
-    K extends keyof PersonalDetailsData,
+    K extends keyof PersonalDetails,
   >(
     field: K,
-    value: PersonalDetailsData[K],
+    value: PersonalDetails[K],
   ) {
     setFormData((currentData) => ({
       ...currentData,
       personalDetails: {
         ...currentData.personalDetails,
-        [field]: value,
-      },
-    }));
-  }
-
-  function updateEducationField<
-    K extends keyof EducationAndSkillsData,
-  >(
-    field: K,
-    value: EducationAndSkillsData[K],
-  ) {
-    setFormData((currentData) => ({
-      ...currentData,
-      educationAndSkills: {
-        ...currentData.educationAndSkills,
         [field]: value,
       },
     }));
@@ -120,13 +115,36 @@ function App() {
     );
   };
 
-  const numberOfErrors =
-    Object.keys(errors.personalDetails).length +
-    Object.keys(errors.educationAndSkills).length +
-    (errors.termsAccepted ? 1 : 0);
+  const renderCurrentStep = () => {
+    switch (currentStep) {
+      case 1:
+        return (
+          <PersonalDetailsStep
+            data={formData.personalDetails}
+            errors={errors.personalDetails}
+            onChange={updatePersonalField}
+          />
+        );
 
-  const applicantName =
-    `${formData.personalDetails.firstName} ${formData.personalDetails.lastName}`.trim();
+      case 2:
+        return (
+          <StepPlaceholder
+            step={2}
+            title="Education and skills"
+            description="The education, skills and CV fields will be added in the next feature."
+          />
+        );
+
+      case 3:
+        return (
+          <StepPlaceholder
+            step={3}
+            title="Review and submit"
+            description="The final application review will be added after the form steps are complete."
+          />
+        );
+    }
+  };
 
   return (
     <main className="app">
@@ -139,136 +157,74 @@ function App() {
           <h1>Application Form Wizard</h1>
 
           <p>
-            Complete the three steps below to prepare
-            your internship application.
+            Complete each section to prepare your internship application.
+            Your information will remain in your browser until you submit or
+            clear the form.
           </p>
         </header>
 
-        <section className="type-check-card">
-          <div className="step-status">
-            <p className="step-number">
-              Step {currentStep} of 3
-            </p>
+        <nav
+          className="progress-indicator"
+          aria-label="Application progress"
+        >
+          {wizardSteps.map((step) => {
+            const isActive =
+              step.number === currentStep;
 
-            <h2>{stepTitles[currentStep]}</h2>
+            const isCompleted =
+              step.number < currentStep;
 
-            <p>
-              Reusable typed form components are now
-              connected to the application state.
-            </p>
-          </div>
+            const classNames = [
+              "progress-step",
+              isActive ? "progress-step-active" : "",
+              isCompleted ? "progress-step-completed" : "",
+            ]
+              .filter(Boolean)
+              .join(" ");
 
-          <div className="type-summary">
-            <div>
-              <span>Applicant</span>
-              <strong>
-                {applicantName || "Not entered yet"}
-              </strong>
-            </div>
-
-            <div>
-              <span>Experience</span>
-              <strong>
-                {formData.educationAndSkills
-                  .experienceLevel ||
-                  "Not selected"}
-              </strong>
-            </div>
-
-            <div>
-              <span>Validation errors</span>
-              <strong>{numberOfErrors}</strong>
-            </div>
-          </div>
-
-          <section className="component-preview">
-            <div className="preview-heading">
-              <p className="step-number">
-                Component preview
-              </p>
-
-              <h2>Reusable typed controls</h2>
-
-              <p>
-                Enter sample values to confirm that the
-                components update the typed form state.
-              </p>
-            </div>
-
-            <div className="preview-grid">
-              <TextInput
-                id="preview-first-name"
-                label="First name"
-                value={
-                  formData.personalDetails.firstName
+            return (
+              <div
+                key={step.number}
+                className={classNames}
+                aria-current={
+                  isActive ? "step" : undefined
                 }
-                onChange={(value) =>
-                  updatePersonalField(
-                    "firstName",
-                    value,
-                  )
-                }
-                type="text"
-                placeholder="Enter your first name"
-                autoComplete="given-name"
-                required
-              />
+              >
+                <span className="progress-step-number">
+                  {isCompleted ? "✓" : step.number}
+                </span>
 
-              <TextInput
-                id="preview-email"
-                label="Email address"
-                value={
-                  formData.personalDetails.email
-                }
-                onChange={(value) =>
-                  updatePersonalField("email", value)
-                }
-                type="email"
-                placeholder="name@example.com"
-                autoComplete="email"
-                helperText="Use an email address you check regularly."
-                required
-              />
+                <span className="progress-step-label">
+                  {step.label}
+                </span>
+              </div>
+            );
+          })}
+        </nav>
 
-              <SelectInput
-                id="preview-experience"
-                label="Experience level"
-                value={
-                  formData.educationAndSkills
-                    .experienceLevel
-                }
-                options={experienceOptions}
-                onChange={(value) =>
-                  updateEducationField(
-                    "experienceLevel",
-                    value,
-                  )
-                }
-                required
-              />
-            </div>
-          </section>
+        <div className="wizard-content">
+          {renderCurrentStep()}
+        </div>
 
-          <div className="navigation-buttons">
-            <button
-              type="button"
-              className="secondary-button"
-              onClick={handlePreviousStep}
-              disabled={currentStep === 1}
-            >
-              Previous
-            </button>
+        <footer className="wizard-navigation">
+          <button
+            type="button"
+            className="secondary-button"
+            onClick={handlePreviousStep}
+            disabled={currentStep === 1}
+          >
+            Previous
+          </button>
 
-            <button
-              type="button"
-              className="primary-button"
-              onClick={handleNextStep}
-              disabled={currentStep === 3}
-            >
-              Next
-            </button>
-          </div>
-        </section>
+          <button
+            type="button"
+            className="primary-button"
+            onClick={handleNextStep}
+            disabled={currentStep === 3}
+          >
+            Next
+          </button>
+        </footer>
       </section>
     </main>
   );

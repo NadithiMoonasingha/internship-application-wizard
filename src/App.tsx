@@ -1,7 +1,10 @@
 import { useState } from "react";
 import "./App.css";
 
-import { PersonalDetailsStep } from "./components/steps";
+import {
+  EducationAndSkillsStep,
+  PersonalDetailsStep,
+} from "./components/steps";
 
 import {
   initialApplicationData,
@@ -10,6 +13,7 @@ import {
 
 import type {
   ApplicationFormData,
+  EducationAndSkills,
   FormErrors,
   FormStep,
   PersonalDetails,
@@ -103,6 +107,21 @@ function App() {
     }));
   }
 
+  function updateEducationField<
+    K extends keyof EducationAndSkills,
+  >(
+    field: K,
+    value: EducationAndSkills[K],
+  ) {
+    setFormData((currentData) => ({
+      ...currentData,
+      educationAndSkills: {
+        ...currentData.educationAndSkills,
+        [field]: value,
+      },
+    }));
+  }
+
   const handlePreviousStep = () => {
     setCurrentStep(
       (current) => previousSteps[current],
@@ -128,10 +147,14 @@ function App() {
 
       case 2:
         return (
-          <StepPlaceholder
-            step={2}
-            title="Education and skills"
-            description="The education, skills and CV fields will be added in the next feature."
+          <EducationAndSkillsStep
+            data={
+              formData.educationAndSkills
+            }
+            errors={
+              errors.educationAndSkills
+            }
+            onChange={updateEducationField}
           />
         );
 
@@ -157,9 +180,10 @@ function App() {
           <h1>Application Form Wizard</h1>
 
           <p>
-            Complete each section to prepare your internship application.
-            Your information will remain in your browser until you submit or
-            clear the form.
+            Complete each section to prepare your
+            internship application. Your information
+            will remain in your browser until you
+            submit or clear the form.
           </p>
         </header>
 
@@ -176,8 +200,12 @@ function App() {
 
             const classNames = [
               "progress-step",
-              isActive ? "progress-step-active" : "",
-              isCompleted ? "progress-step-completed" : "",
+              isActive
+                ? "progress-step-active"
+                : "",
+              isCompleted
+                ? "progress-step-completed"
+                : "",
             ]
               .filter(Boolean)
               .join(" ");
@@ -187,11 +215,15 @@ function App() {
                 key={step.number}
                 className={classNames}
                 aria-current={
-                  isActive ? "step" : undefined
+                  isActive
+                    ? "step"
+                    : undefined
                 }
               >
                 <span className="progress-step-number">
-                  {isCompleted ? "✓" : step.number}
+                  {isCompleted
+                    ? "✓"
+                    : step.number}
                 </span>
 
                 <span className="progress-step-label">

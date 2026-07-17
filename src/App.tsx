@@ -1,10 +1,7 @@
 import { useState } from "react";
 import "./App.css";
 
-import {
-  EducationAndSkillsStep,
-  PersonalDetailsStep,
-} from "./components/steps";
+import { PersonalDetailsStep } from "./components/steps";
 
 import {
   initialApplicationData,
@@ -13,7 +10,6 @@ import {
 
 import type {
   ApplicationFormData,
-  EducationAndSkills,
   FormErrors,
   FormStep,
   PersonalDetails,
@@ -107,21 +103,6 @@ function App() {
     }));
   }
 
-  function updateEducationField<
-  K extends keyof EducationAndSkills,
->(
-  field: K,
-  value: EducationAndSkills[K],
-) {
-  setFormData((currentData) => ({
-    ...currentData,
-    educationAndSkills: {
-      ...currentData.educationAndSkills,
-      [field]: value,
-    },
-  }));
-}
-
   const handlePreviousStep = () => {
     setCurrentStep(
       (current) => previousSteps[current],
@@ -147,10 +128,10 @@ function App() {
 
       case 2:
         return (
-          <EducationAndSkillsStep
-            data={formData.educationAndSkills}
-            errors={errors.educationAndSkills}
-            onChange={updateEducationField}
+          <StepPlaceholder
+            step={2}
+            title="Education and skills"
+            description="The education, skills and CV fields will be added in the next feature."
           />
         );
 

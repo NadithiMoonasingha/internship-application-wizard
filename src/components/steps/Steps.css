@@ -356,4 +356,37 @@
   .add-skill-button {
     width: 100%;
   }
+
+  .review-section-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .edit-section-button {
+    width: 100%;
+  }
+
+  .review-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .review-item:nth-child(odd),
+  .review-item:nth-child(even) {
+    padding-right: 0;
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .review-submit-area {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .submit-application-button {
+    width: 100%;
+  }
+
+  .submission-success {
+    min-height: 330px;
+  }
 }

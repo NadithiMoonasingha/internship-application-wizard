@@ -20,6 +20,13 @@ import type {
   PersonalDetails,
 } from "./types/application";
 
+import {
+  hasValidationErrors,
+  validateEducationAndSkills,
+  validatePersonalDetails,
+  validateTermsAccepted,
+} from "./utils/validation";
+
 interface WizardStep {
   number: FormStep;
   label: string;
@@ -67,6 +74,42 @@ function App() {
   const [isSubmitted, setIsSubmitted] =
     useState(false);
 
+  function clearPersonalFieldError<
+    K extends keyof PersonalDetails,
+  >(field: K) {
+    setErrors((currentErrors) => {
+      const nextPersonalErrors = {
+        ...currentErrors.personalDetails,
+      };
+
+      delete nextPersonalErrors[field];
+
+      return {
+        ...currentErrors,
+        personalDetails:
+          nextPersonalErrors,
+      };
+    });
+  }
+
+  function clearEducationFieldError<
+    K extends keyof EducationAndSkills,
+  >(field: K) {
+    setErrors((currentErrors) => {
+      const nextEducationErrors = {
+        ...currentErrors.educationAndSkills,
+      };
+
+      delete nextEducationErrors[field];
+
+      return {
+        ...currentErrors,
+        educationAndSkills:
+          nextEducationErrors,
+      };
+    });
+  }
+
   function updatePersonalField<
     K extends keyof PersonalDetails,
   >(
@@ -80,6 +123,8 @@ function App() {
         [field]: value,
       },
     }));
+
+    clearPersonalFieldError(field);
   }
 
   function updateEducationField<
@@ -95,6 +140,8 @@ function App() {
         [field]: value,
       },
     }));
+
+    clearEducationFieldError(field);
   }
 
   const updateTermsAccepted = (
@@ -118,42 +165,141 @@ function App() {
     }
   };
 
+  const moveToStep = (
+    step: FormStep,
+  ) => {
+    setCurrentStep(step);
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
   const handlePreviousStep = () => {
-    setCurrentStep(
-      (current) => previousSteps[current],
-    );
+    moveToStep(previousSteps[currentStep]);
   };
 
   const handleNextStep = () => {
-    setCurrentStep(
-      (current) => nextSteps[current],
-    );
+    if (currentStep === 1) {
+      const personalErrors =
+        validatePersonalDetails(
+          formData.personalDetails,
+        );
+
+      if (
+        hasValidationErrors(personalErrors)
+      ) {
+        setErrors((currentErrors) => ({
+          ...currentErrors,
+          personalDetails:
+            personalErrors,
+        }));
+
+        return;
+      }
+
+      setErrors((currentErrors) => ({
+        ...currentErrors,
+        personalDetails: {},
+      }));
+    }
+
+    if (currentStep === 2) {
+      const educationErrors =
+        validateEducationAndSkills(
+          formData.educationAndSkills,
+        );
+
+      if (
+        hasValidationErrors(
+          educationErrors,
+        )
+      ) {
+        setErrors((currentErrors) => ({
+          ...currentErrors,
+          educationAndSkills:
+            educationErrors,
+        }));
+
+        return;
+      }
+
+      setErrors((currentErrors) => ({
+        ...currentErrors,
+        educationAndSkills: {},
+      }));
+    }
+
+    moveToStep(nextSteps[currentStep]);
   };
 
   const handleEditStep = (
     step: 1 | 2,
   ) => {
-    setCurrentStep(step);
+    moveToStep(step);
   };
 
   const handleSubmit = () => {
-    if (!formData.termsAccepted) {
-      setErrors((currentErrors) => ({
-        ...currentErrors,
-        termsAccepted:
-          "Please confirm that your information is accurate.",
-      }));
+    const personalErrors =
+      validatePersonalDetails(
+        formData.personalDetails,
+      );
 
+    const educationErrors =
+      validateEducationAndSkills(
+        formData.educationAndSkills,
+      );
+
+    const termsError =
+      validateTermsAccepted(
+        formData.termsAccepted,
+      );
+
+    setErrors({
+      personalDetails: personalErrors,
+      educationAndSkills:
+        educationErrors,
+      ...(termsError
+        ? {
+            termsAccepted: termsError,
+          }
+        : {}),
+    });
+
+    if (
+      hasValidationErrors(personalErrors)
+    ) {
+      moveToStep(1);
+      return;
+    }
+
+    if (
+      hasValidationErrors(
+        educationErrors,
+      )
+    ) {
+      moveToStep(2);
+      return;
+    }
+
+    if (termsError) {
       return;
     }
 
     setIsSubmitted(true);
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
   };
 
   const handleStartNew = () => {
     setFormData({
       personalDetails: {
-        ...initialApplicationData.personalDetails,
+        ...initialApplicationData
+          .personalDetails,
       },
 
       educationAndSkills: {
@@ -172,7 +318,29 @@ function App() {
 
     setCurrentStep(1);
     setIsSubmitted(false);
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
   };
+
+  const personalErrorCount =
+    Object.keys(
+      errors.personalDetails,
+    ).length;
+
+  const educationErrorCount =
+    Object.keys(
+      errors.educationAndSkills,
+    ).length;
+
+  const currentStepErrorCount =
+    currentStep === 1
+      ? personalErrorCount
+      : currentStep === 2
+        ? educationErrorCount
+        : 0;
 
   const renderCurrentStep = () => {
     switch (currentStep) {
@@ -180,7 +348,9 @@ function App() {
         return (
           <PersonalDetailsStep
             data={formData.personalDetails}
-            errors={errors.personalDetails}
+            errors={
+              errors.personalDetails
+            }
             onChange={updatePersonalField}
           />
         );
@@ -285,6 +455,25 @@ function App() {
         </nav>
 
         <div className="wizard-content">
+          {currentStepErrorCount > 0 && (
+            <div
+              className="validation-summary"
+              role="alert"
+            >
+              <strong>
+                Please check this section.
+              </strong>
+
+              <span>
+                {currentStepErrorCount}{" "}
+                {currentStepErrorCount === 1
+                  ? "field needs"
+                  : "fields need"}{" "}
+                your attention.
+              </span>
+            </div>
+          )}
+
           {renderCurrentStep()}
         </div>
 
@@ -294,7 +483,9 @@ function App() {
               type="button"
               className="secondary-button"
               onClick={handlePreviousStep}
-              disabled={currentStep === 1}
+              disabled={
+                currentStep === 1
+              }
             >
               Previous
             </button>

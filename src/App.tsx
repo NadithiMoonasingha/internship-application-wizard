@@ -1,4 +1,8 @@
-import { useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
+
 import "./App.css";
 
 import {
@@ -19,6 +23,12 @@ import type {
   FormStep,
   PersonalDetails,
 } from "./types/application";
+
+import {
+  clearStoredApplicationState,
+  loadStoredApplicationState,
+  saveStoredApplicationState,
+} from "./utils/storage";
 
 import {
   hasValidationErrors,
@@ -59,20 +69,61 @@ const nextSteps: Record<FormStep, FormStep> = {
   3: 3,
 };
 
+function createEmptyApplicationData(): ApplicationFormData {
+  return {
+    personalDetails: {
+      ...initialApplicationData
+        .personalDetails,
+    },
+
+    educationAndSkills: {
+      ...initialApplicationData
+        .educationAndSkills,
+      skills: [],
+    },
+
+    termsAccepted: false,
+  };
+}
+
 function App() {
+  const [restoredState] = useState(
+    loadStoredApplicationState,
+  );
+
   const [currentStep, setCurrentStep] =
-    useState<FormStep>(1);
+    useState<FormStep>(
+      restoredState?.currentStep ?? 1,
+    );
 
   const [formData, setFormData] =
     useState<ApplicationFormData>(
-      initialApplicationData,
+      restoredState?.formData ??
+        createEmptyApplicationData(),
     );
 
   const [errors, setErrors] =
-    useState<FormErrors>(initialFormErrors);
+    useState<FormErrors>(
+      initialFormErrors,
+    );
 
   const [isSubmitted, setIsSubmitted] =
     useState(false);
+
+  useEffect(() => {
+    if (isSubmitted) {
+      return;
+    }
+
+    saveStoredApplicationState({
+      currentStep,
+      formData,
+    });
+  }, [
+    currentStep,
+    formData,
+    isSubmitted,
+  ]);
 
   function clearPersonalFieldError<
     K extends keyof PersonalDetails,
@@ -118,6 +169,7 @@ function App() {
   ) {
     setFormData((currentData) => ({
       ...currentData,
+
       personalDetails: {
         ...currentData.personalDetails,
         [field]: value,
@@ -135,6 +187,7 @@ function App() {
   ) {
     setFormData((currentData) => ({
       ...currentData,
+
       educationAndSkills: {
         ...currentData.educationAndSkills,
         [field]: value,
@@ -177,7 +230,9 @@ function App() {
   };
 
   const handlePreviousStep = () => {
-    moveToStep(previousSteps[currentStep]);
+    moveToStep(
+      previousSteps[currentStep],
+    );
   };
 
   const handleNextStep = () => {
@@ -188,13 +243,18 @@ function App() {
         );
 
       if (
-        hasValidationErrors(personalErrors)
+        hasValidationErrors(
+          personalErrors,
+        )
       ) {
-        setErrors((currentErrors) => ({
-          ...currentErrors,
-          personalDetails:
-            personalErrors,
-        }));
+        setErrors(
+          (currentErrors) => ({
+            ...currentErrors,
+
+            personalDetails:
+              personalErrors,
+          }),
+        );
 
         return;
       }
@@ -216,11 +276,14 @@ function App() {
           educationErrors,
         )
       ) {
-        setErrors((currentErrors) => ({
-          ...currentErrors,
-          educationAndSkills:
-            educationErrors,
-        }));
+        setErrors(
+          (currentErrors) => ({
+            ...currentErrors,
+
+            educationAndSkills:
+              educationErrors,
+          }),
+        );
 
         return;
       }
@@ -231,13 +294,49 @@ function App() {
       }));
     }
 
-    moveToStep(nextSteps[currentStep]);
+    moveToStep(
+      nextSteps[currentStep],
+    );
   };
 
   const handleEditStep = (
     step: 1 | 2,
   ) => {
     moveToStep(step);
+  };
+
+  const resetApplication = () => {
+    clearStoredApplicationState();
+
+    setFormData(
+      createEmptyApplicationData(),
+    );
+
+    setErrors({
+      personalDetails: {},
+      educationAndSkills: {},
+    });
+
+    setCurrentStep(1);
+    setIsSubmitted(false);
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
+  const handleClearForm = () => {
+    const shouldClear =
+      window.confirm(
+        "Clear all information entered in this application?",
+      );
+
+    if (!shouldClear) {
+      return;
+    }
+
+    resetApplication();
   };
 
   const handleSubmit = () => {
@@ -257,18 +356,24 @@ function App() {
       );
 
     setErrors({
-      personalDetails: personalErrors,
+      personalDetails:
+        personalErrors,
+
       educationAndSkills:
         educationErrors,
+
       ...(termsError
         ? {
-            termsAccepted: termsError,
+            termsAccepted:
+              termsError,
           }
         : {}),
     });
 
     if (
-      hasValidationErrors(personalErrors)
+      hasValidationErrors(
+        personalErrors,
+      )
     ) {
       moveToStep(1);
       return;
@@ -287,37 +392,8 @@ function App() {
       return;
     }
 
+    clearStoredApplicationState();
     setIsSubmitted(true);
-
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  };
-
-  const handleStartNew = () => {
-    setFormData({
-      personalDetails: {
-        ...initialApplicationData
-          .personalDetails,
-      },
-
-      educationAndSkills: {
-        ...initialApplicationData
-          .educationAndSkills,
-        skills: [],
-      },
-
-      termsAccepted: false,
-    });
-
-    setErrors({
-      personalDetails: {},
-      educationAndSkills: {},
-    });
-
-    setCurrentStep(1);
-    setIsSubmitted(false);
 
     window.scrollTo({
       top: 0,
@@ -347,11 +423,15 @@ function App() {
       case 1:
         return (
           <PersonalDetailsStep
-            data={formData.personalDetails}
+            data={
+              formData.personalDetails
+            }
             errors={
               errors.personalDetails
             }
-            onChange={updatePersonalField}
+            onChange={
+              updatePersonalField
+            }
           />
         );
 
@@ -359,12 +439,16 @@ function App() {
         return (
           <EducationAndSkillsStep
             data={
-              formData.educationAndSkills
+              formData
+                .educationAndSkills
             }
             errors={
-              errors.educationAndSkills
+              errors
+                .educationAndSkills
             }
-            onChange={updateEducationField}
+            onChange={
+              updateEducationField
+            }
           />
         );
 
@@ -375,13 +459,21 @@ function App() {
             termsError={
               errors.termsAccepted
             }
-            isSubmitted={isSubmitted}
+            isSubmitted={
+              isSubmitted
+            }
             onTermsChange={
               updateTermsAccepted
             }
-            onEditStep={handleEditStep}
-            onSubmit={handleSubmit}
-            onStartNew={handleStartNew}
+            onEditStep={
+              handleEditStep
+            }
+            onSubmit={
+              handleSubmit
+            }
+            onStartNew={
+              resetApplication
+            }
           />
         );
     }
@@ -400,10 +492,11 @@ function App() {
           </h1>
 
           <p>
-            Complete each section to prepare your
-            internship application. Your information
-            will remain in your browser until you
-            submit or clear the form.
+            Complete each section to
+            prepare your internship
+            application. Your progress
+            is saved automatically in
+            this browser.
           </p>
         </header>
 
@@ -413,16 +506,20 @@ function App() {
         >
           {wizardSteps.map((step) => {
             const isActive =
-              step.number === currentStep;
+              step.number ===
+              currentStep;
 
             const isCompleted =
-              step.number < currentStep;
+              step.number <
+              currentStep;
 
             const classNames = [
               "progress-step",
+
               isActive
                 ? "progress-step-active"
                 : "",
+
               isCompleted
                 ? "progress-step-completed"
                 : "",
@@ -454,19 +551,42 @@ function App() {
           })}
         </nav>
 
+        <div
+          className="storage-notice"
+          role="status"
+        >
+          <span
+            className="storage-notice-icon"
+            aria-hidden="true"
+          >
+            ✓
+          </span>
+
+          <span>
+            Progress is saved
+            automatically on this
+            device.
+          </span>
+        </div>
+
         <div className="wizard-content">
-          {currentStepErrorCount > 0 && (
+          {currentStepErrorCount >
+            0 && (
             <div
               className="validation-summary"
               role="alert"
             >
               <strong>
-                Please check this section.
+                Please check this
+                section.
               </strong>
 
               <span>
-                {currentStepErrorCount}{" "}
-                {currentStepErrorCount === 1
+                {
+                  currentStepErrorCount
+                }{" "}
+                {currentStepErrorCount ===
+                1
                   ? "field needs"
                   : "fields need"}{" "}
                 your attention.
@@ -479,22 +599,38 @@ function App() {
 
         {!isSubmitted && (
           <footer className="wizard-navigation">
-            <button
-              type="button"
-              className="secondary-button"
-              onClick={handlePreviousStep}
-              disabled={
-                currentStep === 1
-              }
-            >
-              Previous
-            </button>
+            <div className="wizard-navigation-left">
+              <button
+                type="button"
+                className="secondary-button"
+                onClick={
+                  handlePreviousStep
+                }
+                disabled={
+                  currentStep === 1
+                }
+              >
+                Previous
+              </button>
+
+              <button
+                type="button"
+                className="clear-form-button"
+                onClick={
+                  handleClearForm
+                }
+              >
+                Clear form
+              </button>
+            </div>
 
             {currentStep < 3 && (
               <button
                 type="button"
                 className="primary-button"
-                onClick={handleNextStep}
+                onClick={
+                  handleNextStep
+                }
               >
                 Next
               </button>

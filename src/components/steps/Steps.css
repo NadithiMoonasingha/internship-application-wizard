@@ -3,35 +3,41 @@
 }
 
 .form-step-header {
-  max-width: 680px;
-  margin-bottom: 32px;
+  max-width: 700px;
+  margin-bottom: 34px;
 }
 
 .step-eyebrow {
   margin-bottom: 7px;
   color: #4f46e5;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 800;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
 .form-step-header h2 {
-  margin-bottom: 10px;
+  margin-bottom: 11px;
   color: #0f172a;
-  font-size: clamp(1.55rem, 4vw, 2rem);
+  font-size: clamp(1.6rem, 4vw, 2.1rem);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
 }
 
 .form-step-header > p:last-child {
   margin-bottom: 0;
   color: #64748b;
-  line-height: 1.7;
+  line-height: 1.75;
 }
 
 .form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 24px;
+  gap: 25px 24px;
+}
+
+.form-grid > * {
+  min-width: 0;
 }
 
 .full-width-field {
@@ -51,18 +57,24 @@
 
 .add-skill-button {
   flex: 0 0 auto;
+  min-height: 48px;
   padding: 10px 18px;
   color: #ffffff;
   background: #4f46e5;
   border: 1px solid #4f46e5;
-  border-radius: 9px;
+  border-radius: 10px;
   font-weight: 700;
   cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    transform 150ms ease;
 }
 
 .add-skill-button:hover:not(:disabled) {
   background: #4338ca;
   border-color: #4338ca;
+  transform: translateY(-1px);
 }
 
 .add-skill-button:disabled {
@@ -74,13 +86,14 @@
   display: flex;
   flex-wrap: wrap;
   gap: 9px;
-  margin: 4px 0 0;
+  margin: 5px 0 0;
   padding: 0;
   list-style: none;
 }
 
 .skill-tag {
   display: inline-flex;
+  max-width: 100%;
   align-items: center;
   gap: 7px;
   padding: 7px 8px 7px 12px;
@@ -92,10 +105,17 @@
   font-weight: 700;
 }
 
+.skill-tag span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .remove-skill-button {
   display: grid;
-  width: 24px;
-  height: 24px;
+  flex: 0 0 26px;
+  width: 26px;
+  height: 26px;
   padding: 0;
   place-items: center;
   color: #4338ca;
@@ -113,7 +133,7 @@
 }
 
 .empty-skills {
-  margin: 4px 0 0;
+  margin: 5px 0 0;
   color: #94a3b8;
   font-size: 0.875rem;
 }
@@ -121,7 +141,7 @@
 .review-form {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 26px;
 }
 
 .review-section {
@@ -145,6 +165,7 @@
   margin: 0;
   color: #0f172a;
   font-size: 1.15rem;
+  line-height: 1.35;
 }
 
 .review-section-number {
@@ -152,17 +173,18 @@
   color: #4f46e5;
   font-size: 0.75rem;
   font-weight: 800;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
 }
 
 .edit-section-button {
   flex: 0 0 auto;
+  min-height: 42px;
   padding: 9px 13px;
   color: #4338ca;
   background: #ffffff;
   border: 1px solid #c7d2fe;
-  border-radius: 8px;
+  border-radius: 9px;
   font-weight: 700;
   cursor: pointer;
 }
@@ -198,9 +220,9 @@
 .review-item dt {
   margin-bottom: 7px;
   color: #64748b;
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.03em;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
@@ -232,6 +254,8 @@
 }
 
 .review-skill-list li {
+  max-width: 100%;
+  overflow-wrap: anywhere;
   padding: 7px 12px;
   color: #3730a3;
   background: #eef2ff;
@@ -264,8 +288,9 @@
 }
 
 .confirmation-checkbox input {
-  width: 18px;
-  height: 18px;
+  flex: 0 0 19px;
+  width: 19px;
+  height: 19px;
   margin-top: 3px;
   accent-color: #4f46e5;
   cursor: pointer;
@@ -290,16 +315,12 @@
   margin: 0;
   color: #64748b;
   font-size: 0.875rem;
-  line-height: 1.6;
+  line-height: 1.65;
 }
 
 .submit-application-button,
 .start-new-button {
   flex: 0 0 auto;
-  padding: 12px 20px;
-  border-radius: 9px;
-  font-weight: 750;
-  cursor: pointer;
 }
 
 .submission-success {
@@ -340,30 +361,13 @@
   line-height: 1.7;
 }
 
-@media (max-width: 700px) {
+@media (max-width: 760px) {
   .form-grid {
     grid-template-columns: 1fr;
   }
 
   .full-width-field {
     grid-column: auto;
-  }
-
-  .skills-input-row {
-    flex-direction: column;
-  }
-
-  .add-skill-button {
-    width: 100%;
-  }
-
-  .review-section-header {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .edit-section-button {
-    width: 100%;
   }
 
   .review-grid {
@@ -376,6 +380,39 @@
     padding-left: 0;
     border-left: 0;
   }
+}
+
+@media (max-width: 700px) {
+  .form-step-header {
+    margin-bottom: 28px;
+  }
+
+  .skills-input-row {
+    flex-direction: column;
+  }
+
+  .add-skill-button {
+    width: 100%;
+  }
+
+  .review-section-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .edit-section-button {
+    width: 100%;
+  }
+
+  .review-grid {
+    padding-right: 20px;
+    padding-left: 20px;
+  }
+
+  .review-skills {
+    padding-right: 20px;
+    padding-left: 20px;
+  }
 
   .review-submit-area {
     align-items: stretch;
@@ -387,6 +424,34 @@
   }
 
   .submission-success {
-    min-height: 330px;
+    min-height: 340px;
+    padding: 38px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .form-grid {
+    gap: 22px;
+  }
+
+  .review-section-header,
+  .submission-confirmation {
+    padding: 18px;
+  }
+
+  .review-grid {
+    padding: 5px 18px 20px;
+  }
+
+  .review-skills {
+    padding: 0 18px 20px;
+  }
+
+  .skill-tag {
+    max-width: 100%;
+  }
+
+  .submission-success {
+    border-radius: 12px;
   }
 }

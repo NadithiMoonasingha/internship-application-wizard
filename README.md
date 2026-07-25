@@ -8,7 +8,7 @@ The project demonstrates strongly typed form state, reusable components, custom 
 
 ## Live Demo
 
-A live deployment link can be added here after the project is deployed.
+[A live deployment link can be added here after the project is deployed.](https://nadithimoonasingha.github.io/internship-application-wizard/)
 
 ## Features
 

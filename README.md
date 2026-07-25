@@ -4,7 +4,7 @@ A responsive three-step internship application form built with React, TypeScript
 
 The project demonstrates strongly typed form state, reusable components, custom validation, browser file handling, local storage persistence and responsive frontend architecture without using a backend.
 
-![Internship Application Form Wizard](docs/screenshots/personal-details.png)
+![Internship Application Form Wizard](docs/screenshots/personal-details1.png)
 
 ## Live Demo
 
@@ -36,15 +36,20 @@ A live deployment link can be added here after the project is deployed.
 
 ### Personal Details
 
-![Personal Details step](docs/screenshots/personal-details.png)
+![Personal Details step](docs/screenshots/personal-details1.png)
+![Personal Details step](docs/screenshots/personal-details2.png)
+
 
 ### Education and Skills
 
-![Education and Skills step](docs/screenshots/education-skills.png)
+![Education and Skills step](docs/screenshots/education-skills1.png)
+![Education and Skills step](docs/screenshots/education-skills2.png)
 
 ### Review and Submit
 
-![Review and Submit step](docs/screenshots/review-submit.png)
+![Review and Submit step](docs/screenshots/review-submit1.png)
+![Review and Submit step](docs/screenshots/review-submit2.png)
+![Review and Submit step](docs/screenshots/review-submit3.png)
 
 ### Submission Success
 
